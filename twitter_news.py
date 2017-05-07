@@ -103,6 +103,8 @@ def plot_trends():
     trends_plus_volumes = trends_and_volumes(args.woeid)
     test = trends_plus_volumes.items()
     graph = Pyasciigraph()
+    print("These are the current trends as of {} for {}".format(time,
+                                                                args.location))
     for line in graph.graph('Graph of trends from {}'.format(location), test):
         print(line)
 
@@ -120,8 +122,7 @@ def plot_trends_list(locationlist):
 
 def main():
     time = datetime.datetime.now().time()
-    print("These are the current trends as of {} for {}".format(time,
-                                                                args.location))
+    
     woeids = get_woeid_usa()
     # print(trends_and_volumes(args.woeid))
     # print(plot_trends())

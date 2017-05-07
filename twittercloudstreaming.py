@@ -17,7 +17,7 @@ try:
 except ImportError:
     from urlparse import urlparse
 
-parser = argparse.ArgumentParser(description= "WordClouds of users tweets",
+parser = argparse.ArgumentParser(description="WordClouds of users tweets",
                                  usage='%(prog)s -f <@tweet_filter> [options]')
 parser.add_argument('-l', '--limit', metavar='N', type=int, default=1000,
                     help='limit the number of tweets to get that contain that filter')
@@ -65,6 +65,8 @@ class MyStreamListener(tweepy.StreamListener):
 myStreamListener = MyStreamListener()
 myStream = tweepy.Stream(auth=twitter_api.auth, listener=myStreamListener)
 myStream.filter(track=[args.scope])
+myStream.sample()
 cloud(args.scope + '.txt')
+
 
 

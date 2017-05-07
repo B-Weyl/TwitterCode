@@ -1,3 +1,5 @@
+#! /usr/local/bin/python3
+
 import tweepy
 from wordcloud import WordCloud, STOPWORDS
 import secrets
@@ -15,7 +17,7 @@ try:
 except ImportError:
     from urlparse import urlparse
 
-parser = argparse.ArgumentParser(description= "WordClouds of users tweets",
+parser = argparse.ArgumentParser(description="WordClouds of users tweets",
                                  usage='%(prog)s -n <@screen_name> [options]')
 parser.add_argument('-l', '--limit', metavar='N', type=int, default=1000,
                     help='limit the number of tweets to get')
@@ -31,12 +33,20 @@ twitter_api = tweepy.API(auth)
 
 def get_tweets(api, username, limit):
     filename = args.name + '_tweets.txt'
-    # if the file is already present, we want to remove it and get the most recent tweets
+    # if the file is already present, we want to remove it and get the most 
+    # recent tweets
     if os.path.isfile(filename):
         os.remove(filename)
-    for status in tweepy.Cursor(api.user_timeline, screen_name=username).items(limit):
+    for status in tweepy.Cursor(api.user_timeline, screen_name=username).items(
+            limit):
         # print(status)
         write_tweets(status.text)
+
+
+def get_tweet_time(tweet):
+    filename = args.name + '_tweet_dates.txt'
+    with open(filename, 'ab') as tweet_dates:
+        tweet_dates.write(tweet.created_at + b'\n')
 
 
 def write_tweets(tweet):
@@ -59,7 +69,7 @@ def clean_tweet(tweet):
 
 
 def cloud(username=args.name):
-    #make the cloud
+    # make the cloud
     d = path.dirname(__file__)
     text = open(path.join(d, username + '_tweets.txt'), encoding='UTF-8').read()
     # wordcloud = WordCloud().generate(text)
