@@ -14,41 +14,17 @@ parser.add_argument("-w", "--woeid",
                     help="the woeid of where trends should come from")
 parser.add_argument("-t", "--top", default=10, type=int,
                     help="the number of trends to get: default is 10")
-parser.add_argument("-l", "--location", default='Philadelphia', type=str,
-                    help="the location of trends you would like to get")
-parser.add_argument("-i", "--international", required=False,
-                    help="include international trends (non-usa)")
-parser.add_argument('-lol', '--listoflocations', nargs='*', help='a list of locations')
-
-# parser.add_argument("-r", "--range", required=False, help="determines in how
-# many places a trend is trending")
+# parser.add_argument("-l", "--location", default='Philadelphia', type=str,
+#                     help="the location of trends you would like to get")
+parser.add_argument('-lol', '--listoflocations', nargs='*',
+                    help='a list of locations')
 args = parser.parse_args()
 
 
 def get_woeid_usa():
     places = twitter_api.trends_available()
     all_woeids = {place['name'].lower(): place['woeid'] for place in places}
-    usa_woeids = {place['name'].lower(): place['woeid'] for place in places
-                  if place['country'] == 'United States'}
-    if args.international:
-        return all_woeids
-    else:
-        return usa_woeids
-
-
-# def get_trend_range(trend):
-#     """
-#     given a trend, return all of the woeids with that trend
-#     :param woeid:
-#     :return:
-#     """
-#     places = twitter_api.trends_available()
-#     all_woeids = {place['name']: place['woeid'] for place in places}
-#     trending_places = []
-#     for value in all_woeids.values():
-#         if trend in twitter_api.trends_place(value):
-#             trending_places.append(value)
-#     return trending_places
+    return all_woeids
 
 
 def trends_and_volumes(woeid):
@@ -60,8 +36,8 @@ def trends_and_volumes(woeid):
         pass
     elif args.woeid:
         woeid = args.woeid
-    else:
-        woeid = location_to_woeid(args.location)
+    # else:
+    #     woeid = location_to_woeid(args.location)
     trending_topics = []
     tweet_volume = []
     woeid_trends = twitter_api.trends_place(woeid)
@@ -89,22 +65,7 @@ def location_to_woeid(location):
     if location in all_woeids:
         return all_woeids[location]
     else:
-        # print('This is a list of all available
-        # locations to get trends from:')
-        # names = []
-        # for trend in trends:
-        #     names.append(trend['name'])
-        # print(names)
         raise ValueError('This location cannot be resolved to a WOEID')
-
-
-def plot_trends():
-    location = args.location
-    trends_plus_volumes = trends_and_volumes(args.woeid)
-    test = trends_plus_volumes.items()
-    graph = Pyasciigraph()
-    for line in graph.graph('Graph of trends from {}'.format(location), test):
-        print(line)
 
 
 def plot_trends_list(locationlist):
@@ -113,18 +74,15 @@ def plot_trends_list(locationlist):
         trends_plus_volumes = trends_and_volumes(location_to_woeid(location))
         chart = trends_plus_volumes.items()
         graph = Pyasciigraph()
-        for line in graph.graph('{}'.format(location).title(), chart):
+        time = datetime.datetime.now().time()
+        for line in graph.graph("These are the current " +
+                                "trends for {} as of {}".format(
+                location.title(), time), chart):
             print(line)
-    print(locationlist)
 
 
 def main():
-    time = datetime.datetime.now().time()
-    print("These are the current trends as of {} for {}".format(time,
-                                                                args.location))
     woeids = get_woeid_usa()
-    # print(trends_and_volumes(args.woeid))
-    # print(plot_trends())
     print(plot_trends_list(args.listoflocations))
 
 
