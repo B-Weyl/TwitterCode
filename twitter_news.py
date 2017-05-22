@@ -5,6 +5,9 @@ import datetime
 from ascii_graph import Pyasciigraph
 import collections
 from collections import OrderedDict
+from ascii_graph.colors import *
+from ascii_graph.colordata import vcolor
+from ascii_graph.colordata import hcolor
 
 auth = tweepy.OAuthHandler(secrets.consumer_key, secrets.consumer_secret)
 auth.set_access_token(secrets.access_token, secrets.access_token_secret)
@@ -68,27 +71,32 @@ def location_to_woeid(location):
         raise ValueError('This location cannot be resolved to a WOEID')
 
 
-def plot_trends():
-    location = args.location
-    trends_plus_volumes = trends_and_volumes(args.woeid)
-    test = trends_plus_volumes.items()
-    graph = Pyasciigraph()
-    print("These are the current trends as of {} for {}".format(time,
-                                                                args.location))
-    for line in graph.graph('Graph of trends from {}'.format(location), test):
-        print(line)
+# def plot_trends():
+#     location = args.location
+#     trends_plus_volumes = trends_and_volumes(args.woeid)
+#     pattern = [Gre, Yel, Red]
+#     test = trends_plus_volumes.items()
+#     data = vcolor(test, pattern)
+#     graph = Pyasciigraph(graphsymbol='*')
+
+#     print("These are the current trends as of {} for {}".format(time,
+#                                                                 args.location))
+#     for line in graph.graph('Graph of trends from {}'.format(location), data):
+#         print(line)
 
 
 def plot_trends_list(locationlist):
     locationlist = list(args.listoflocations)
     for location in locationlist:
         trends_plus_volumes = trends_and_volumes(location_to_woeid(location))
+        pattern = [Gre, Yel, Red, Cya]
         chart = trends_plus_volumes.items()
+        data = vcolor(chart, pattern)
         graph = Pyasciigraph()
         time = datetime.datetime.now().time()
         for line in graph.graph("These are the current " +
                                 "trends for {} as of {}".format(
-                location.title(), time), chart):
+                location.title(), time), data):
             print(line)
 
 
