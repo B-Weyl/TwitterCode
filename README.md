@@ -1,2 +1,5 @@
 # TwitterCode
-Uses tweepy to write the tweets of a user to a text file and then uses word_cloud to generate a wordcloud of the users words
+Various code that handles tweets.
+
+twitter_news.py - get the current trends from a location by city name or WOEID (Where on earth ID)
+twitterclouduser.py - create a wordcloud from a users tweets.
