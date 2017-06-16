@@ -21,6 +21,8 @@ parser.add_argument("-t", "--top", default=10, type=int,
 #                     help="the location of trends you would like to get")
 parser.add_argument('-lol', '--listoflocations', nargs='*',
                     help='a list of locations')
+parser.add_argument("-q", "--query",
+                    help="gives tweets for a certain topic")
 args = parser.parse_args()
 
 
@@ -86,24 +88,38 @@ def location_to_woeid(location):
 
 
 def plot_trends_list(locationlist):
-    locationlist = list(args.listoflocations)
-    for location in locationlist:
-        trends_plus_volumes = trends_and_volumes(location_to_woeid(location))
-        pattern = [Gre, Yel, Red, Cya]
-        chart = trends_plus_volumes.items()
-        data = vcolor(chart, pattern)
-        graph = Pyasciigraph()
-        time = datetime.datetime.now().time()
-        for line in graph.graph("These are the current " +
-                                "trends for {} as of {}".format(
-                location.title(), time), data):
-            print(line)
+    if args.listoflocations:
+        locationlist = list(args.listoflocations)
+        for location in locationlist:
+            trends_plus_volumes = trends_and_volumes(location_to_woeid(location))
+            pattern = [Gre, Yel, Red, Cya]
+            chart = trends_plus_volumes.items()
+            data = vcolor(chart, pattern)
+            graph = Pyasciigraph()
+            time = datetime.datetime.now().time()
+            for line in graph.graph("These are the current " +
+                                    "trends for {} as of {}".format(
+                    location.title(), time), data):
+                print(line)
+
+
+def example_tweets(query):
+    """
+    takes in a trend, and returns 5 tweets that contain that trend
+    """
+    query = query + " -filter:links"
+    tweets = twitter_api.search(query, result_type='popular', lang='en')
+    for tweet in tweets:
+        print(tweet.text)
 
 
 def main():
     time = datetime.datetime.now().time()
     woeids = get_woeid_usa()
-    print(plot_trends_list(args.listoflocations))
+    if args.listoflocations:
+        plot_trends_list(args.listoflocations)
+    if args.query:
+        example_tweets(args.query)
 
 
 if __name__ == '__main__':
