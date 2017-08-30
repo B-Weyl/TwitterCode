@@ -32,7 +32,7 @@ We can verify that it works by printing the woeid for philadelphia:
     print(all_woeids['philadelphia'])
     > 2471217
  
- ## Command Line Args
+## Command Line Args
  Detouring to the command line arguements for a moment, we need to decide what we would like to have as options for our program. I decided on the following command line arguements:
  
     parser = argparse.ArgumentParser()
