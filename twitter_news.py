@@ -26,9 +26,13 @@ parser.add_argument("-q", "--query",
 args = parser.parse_args()
 
 
-def get_woeid_usa():
+def get_woeids():
+    """
+    make a dict of woeids and location names
+    """
     places = twitter_api.trends_available()
     all_woeids = {place['name'].lower(): place['woeid'] for place in places}
+    # store the woeid in a dictionary with its correspoding name
     return all_woeids
 
 
@@ -37,18 +41,16 @@ def trends_and_volumes(woeid):
     create a dict of trends from a certain woeid, and tweet_volume
     :return: dict
     """
-    if args.listoflocations:
-        pass
-    elif args.woeid:
+    if args.woeid:
         woeid = args.woeid
-    # else:
-    #     woeid = location_to_woeid(args.location)
     trending_topics = []
     tweet_volume = []
     woeid_trends = twitter_api.trends_place(woeid)
     for woeid_trend in woeid_trends:
         for x in range(args.top):
             trending_topics.append(woeid_trend['trends'][x]['name'])
+            # if the trend volume is none, replace it with 0
+            # so that graphing the trend is easier
             if woeid_trend['trends'][x]['tweet_volume'] is None:
                 woeid_trend['trends'][x]['tweet_volume'] = 0
             tweet_volume.append(woeid_trend['trends'][x]['tweet_volume'])
@@ -58,40 +60,33 @@ def trends_and_volumes(woeid):
     items = list(trend_volume_dict.items())
     items.reverse()
     trend_volume_dict = OrderedDict(items)
-    print("")
     return trend_volume_dict
 
 
 def location_to_woeid(location):
+    """
+    if user inputs a location instead of woeid
+    translate that location to a valid woeid (if there is one)
+    """
     location = location.lower()
     trends = twitter_api.trends_available()
-    error_string = "This location cannot be resolved to a WOEID"
-    all_woeids = get_woeid_usa()
+    all_woeids = get_woeids()
     if location in all_woeids:
         return all_woeids[location]
     else:
+        # The location provided does not match any of the locations
+        # available for trends from Twitter
         raise ValueError('This location cannot be resolved to a WOEID')
 
 
-# def plot_trends():
-#     location = args.location
-#     trends_plus_volumes = trends_and_volumes(args.woeid)
-#     pattern = [Gre, Yel, Red]
-#     test = trends_plus_volumes.items()
-#     data = vcolor(test, pattern)
-#     graph = Pyasciigraph(graphsymbol='*')
-
-#     print("These are the current trends as of {} for {}".format(time,
-#                                                                 args.location))
-#     for line in graph.graph('Graph of trends from {}'.format(location), data):
-#         print(line)
-
-
 def plot_trends_list(locationlist):
+    """
+    create a graph of trends and trend volumes, sorted by trend volume
+    """
     if args.listoflocations:
         locationlist = list(args.listoflocations)
-        for location in locationlist:
-            trends_plus_volumes = trends_and_volumes(location_to_woeid(location))
+        for loc in locationlist:
+            trends_plus_volumes = trends_and_volumes(location_to_woeid(loc))
             pattern = [Gre, Yel, Red, Cya]
             chart = trends_plus_volumes.items()
             data = vcolor(chart, pattern)
@@ -99,27 +94,32 @@ def plot_trends_list(locationlist):
             time = datetime.datetime.now().time()
             for line in graph.graph("These are the current " +
                                     "trends for {} as of {}".format(
-                    location.title(), time), data):
+                    loc.title(), time), data):
                 print(line)
 
 
-def example_tweets(query):
+def query_tweets(query):
     """
-    takes in a trend, and returns 5 tweets that contain that trend
+    takes in a trend, and returns 5 popular tweets that contain that query
     """
+    # we don't want tweets with links, it looks nicer this way
     query = query + " -filter:links"
-    tweets = twitter_api.search(query, result_type='popular', lang='en')
+    tweets = twitter_api.search(query, result_type='popular',
+                                lang='en', count=5)
+    if len(tweets) == 0:
+        print("There are no tweets that match your query, " +
+              "please try another query")
     for tweet in tweets:
         print(tweet.text)
 
 
 def main():
     time = datetime.datetime.now().time()
-    woeids = get_woeid_usa()
+    woeids = get_woeids()
     if args.listoflocations:
         plot_trends_list(args.listoflocations)
     if args.query:
-        example_tweets(args.query)
+        query_tweets(args.query)
 
 
 if __name__ == '__main__':
