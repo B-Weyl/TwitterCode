@@ -8,6 +8,7 @@ from collections import OrderedDict
 from ascii_graph.colors import *
 from ascii_graph.colordata import vcolor
 from ascii_graph.colordata import hcolor
+from datadiff import diff
 
 auth = tweepy.OAuthHandler(secrets.consumer_key, secrets.consumer_secret)
 auth.set_access_token(secrets.access_token, secrets.access_token_secret)
@@ -23,6 +24,8 @@ parser.add_argument('-lol', '--listoflocations', nargs='*',
                     help='a list of locations')
 parser.add_argument("-q", "--query",
                     help="gives tweets for a certain topic")
+parser.add_argument("-c", "--compare", nargs='*',
+                    help="compare trends from two different woeids")
 args = parser.parse_args()
 
 
@@ -98,6 +101,23 @@ def plot_trends_list(locationlist):
                 print(line)
 
 
+def compare_trends(*woeids):
+    shared_trends = []
+    loc1trends = trends_and_volumes(location_to_woeid(args.compare[0]))
+    loc2trends = trends_and_volumes(location_to_woeid(args.compare[1]))
+    for k1, v1 in loc1trends.items():
+        for k2, v2 in loc2trends.items():
+            if k1 == k2:
+                shared_trends.append(k1)
+    shared_trends = ''.join(shared_trends)
+    if len(shared_trends) == 0:
+        print("Sorry, there are no shared trends between " +
+              args.compare[0].title() + " and " + args.compare[1].title())
+    else:
+        print("The shared trends between " + args.compare[0].title() +
+              " and " + args.compare[1].title() + " are " + shared_trends)
+
+
 def query_tweets(query):
     """
     takes in a trend, and returns 5 popular tweets that contain that query
@@ -120,6 +140,8 @@ def main():
         plot_trends_list(args.listoflocations)
     if args.query:
         query_tweets(args.query)
+    if args.compare:
+        compare_trends(args.compare)
 
 
 if __name__ == '__main__':
