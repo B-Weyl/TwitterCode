@@ -109,7 +109,7 @@ def compare_trends(*woeids):
         for k2, v2 in loc2trends.items():
             if k1 == k2:
                 shared_trends.append(k1)
-    shared_trends = ''.join(shared_trends)
+    shared_trends = ' '.join(shared_trends)
     if len(shared_trends) == 0:
         print("Sorry, there are no shared trends between " +
               args.compare[0].title() + " and " + args.compare[1].title())
