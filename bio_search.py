@@ -16,11 +16,10 @@ twitter_api = tweepy.API(auth)
 
 class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
-        with open('bios.txt', 'a') as f:
-            if status.user.description:
-                # print(status.user.description)
-                # f.write(no_emoji(status.user.description) + '\n')
-                find_social_accounts(no_emoji(status.user.description))
+        if status.user.description:
+            # print(status.user.description)
+            # f.write(no_emoji(status.user.description) + '\n')
+            find_social_accounts(no_emoji(status.user.description))
 
     def on_error(self, status_code):
         print(status_code)
@@ -38,17 +37,18 @@ def find_social_accounts(bio):
         words = bio.split(' ')
         for word in words:
             if fnmatch.fnmatch(str(word), 'ig?'):
-                print("An instagram account has been found!")
-                account_file.write('This is where IG was found ' + word + '\n')
+                print("Wrote an Instagram username to the file")
+                # account_file.write('This is where IG was found ' + word + '\n')
                 the_index = int(words.index(word))
                 if the_index + 1 < len(words):
-                    account_file.write('This is the next value ' + words[the_index + 1] + '\n')
+                    if len(words[the_index + 1]) > 0:
+                        account_file.write('Instagram account - ' + words[the_index + 1] + '\n')
             if fnmatch.fnmatch(str(word), 'sc?'):
-                print("A snapchat account has been found!")
-                account_file.write('This is where SC was found ' + word + '\n')
+                print("Wrote a snapchat username to the file")
+                # account_file.write('Snapchat account  ' + word + '\n')
                 the_index = int(words.index(word))
                 if the_index + 1 < len(words):
-                    account_file.write('This is the next value ' + words[the_index + 1] + '\n')
+                    account_file.write('Snapchat account  -  ' + words[the_index + 1] + '\n')
             else:
                 continue
 
