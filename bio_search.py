@@ -3,11 +3,16 @@ import secrets
 import os
 import string
 import re
+import fnmatch
+
 
 auth = tweepy.OAuthHandler(secrets.consumer_key, secrets.consumer_secret)
 auth.set_access_token(secrets.access_token, secrets.access_token_secret)
 twitter_api = tweepy.API(auth)
 
+# get the status from the stream, and get the user bio
+# if the user bio has a social media account, grab that
+# write that account to a file
 
 class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
@@ -15,7 +20,7 @@ class MyStreamListener(tweepy.StreamListener):
             if status.user.description:
                 # print(status.user.description)
                 # f.write(no_emoji(status.user.description) + '\n')
-                f.write(no_emoji(filter_bios(status.user.description)))
+                find_social_accounts(no_emoji(status.user.description))
 
     def on_error(self, status_code):
         print(status_code)
@@ -28,23 +33,29 @@ def no_emoji(tweet):
     return new_string.strip()
 
 
-def filter_bios(bio):
-    profiles = []
-    for word in bio:
-        if 'IG' or 'ig' in word:
-            profiles.append(word)
-    return profiles
-
-
-def contains_profiles(word):
-    if word:
-        if 'IG' in word:
-            return word
+def find_social_accounts(bio):
+    with open('accounts.txt', 'a') as account_file:
+        words = bio.split(' ')
+        for word in words:
+            if fnmatch.fnmatch(str(word), 'ig?'):
+                print("An instagram account has been found!")
+                account_file.write('This is where IG was found ' + word + '\n')
+                the_index = int(words.index(word))
+                if the_index + 1 < len(words):
+                    account_file.write('This is the next value ' + words[the_index + 1] + '\n')
+            if fnmatch.fnmatch(str(word), 'sc?'):
+                print("A snapchat account has been found!")
+                account_file.write('This is where SC was found ' + word + '\n')
+                the_index = int(words.index(word))
+                if the_index + 1 < len(words):
+                    account_file.write('This is the next value ' + words[the_index + 1] + '\n')
+            else:
+                continue
 
 
 def main():
-    if os.path.isfile('bios.txt'):
-        os.remove('bios.txt')
+    if os.path.isfile('accounts.txt'):
+        os.remove('accounts.txt')
     myStreamListener = MyStreamListener()
     myStream = tweepy.Stream(auth=twitter_api.auth, listener=myStreamListener)
     myStream.filter(track=['Sex'])
