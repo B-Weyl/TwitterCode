@@ -14,6 +14,7 @@ twitter_api = tweepy.API(auth)
 # if the user bio has a social media account, grab that
 # write that account to a file
 
+
 class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
         if status.user.description:
@@ -28,8 +29,12 @@ class MyStreamListener(tweepy.StreamListener):
 def no_emoji(tweet):
     tweet = list(filter(lambda x: x in string.printable, tweet))
     new_string = ''.join(tweet)
-    new_string = new_string.replace('QR Code Link to This Post', '')
     return new_string.strip()
+
+
+def get_filter():
+    topic = str(input("Topic to stream data from: "))
+    return topic
 
 
 def find_social_accounts(bio):
@@ -38,17 +43,36 @@ def find_social_accounts(bio):
         for word in words:
             if fnmatch.fnmatch(str(word), 'ig?'):
                 print("Wrote an Instagram username to the file")
-                # account_file.write('This is where IG was found ' + word + '\n')
                 the_index = int(words.index(word))
                 if the_index + 1 < len(words):
+                    # need a better way to handle cases with values found at the end of bio
                     if len(words[the_index + 1]) > 0:
-                        account_file.write('Instagram account - ' + words[the_index + 1] + '\n')
+                        account_file.write(
+                            'Instagram account - ' + words[the_index + 1] + '\n')
+            if fnmatch.fnmatch(str(word), 'insta?'):
+                print("Wrote an Instagram username to the file")
+                the_index = int(words.index(word))
+                if the_index + 1 < len(words):
+                    # need a better way to handle cases with values found at the end of bio
+                    if len(words[the_index + 1]) > 0:
+                        account_file.write(
+                            'Instagram account - ' + words[the_index + 1] + '\n')
             if fnmatch.fnmatch(str(word), 'sc?'):
                 print("Wrote a snapchat username to the file")
-                # account_file.write('Snapchat account  ' + word + '\n')
                 the_index = int(words.index(word))
                 if the_index + 1 < len(words):
-                    account_file.write('Snapchat account  -  ' + words[the_index + 1] + '\n')
+                    # need a better way to handle cases with values found at the end of bio
+                    if len(words[the_index + 1]) > 0:
+                        account_file.write(
+                            'Snapchat account  -  ' + words[the_index + 1] + '\n')
+            if fnmatch.fnmatch(str(word), 'snap?'):
+                print("Wrote a snapchat username to the file")
+                the_index = int(words.index(word))
+                if the_index + 1 < len(words):
+                    # need a better way to handle cases with values found at the end of bio
+                    if len(words[the_index + 1]) > 0:
+                        account_file.write(
+                            'Snapchat account  -  ' + words[the_index + 1] + '\n')
             else:
                 continue
 
@@ -58,7 +82,7 @@ def main():
         os.remove('accounts.txt')
     myStreamListener = MyStreamListener()
     myStream = tweepy.Stream(auth=twitter_api.auth, listener=myStreamListener)
-    myStream.filter(track=['Sex'])
+    myStream.filter(track=[get_filter()])
     filter_bios()
 
 
